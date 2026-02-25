@@ -4,13 +4,13 @@
  */
 
 // Pin definitions
-const int STEP_PIN = 9;      // PWM pin for stepper pulses
-const int DIR_PIN = 8;       // Direction control
+const int STEP_PIN = 5;      // PWM pin for stepper pulses
+const int DIR_PIN = 4;       // Direction control
 const int LIMIT_SWITCH_PIN = 2;  // Interrupt pin for limit switch
-const int ENABLE_PIN = 10;   // Driver enable (optional)
+const int ENABLE_PIN = 8;   // Driver enable (optional)
 
 // Motion parameters
-const int STEPS_PER_MM = 80;  // Calibrate based on your stepper/gearing
+const int STEPS_PER_MM = 8000 / 38;  // Calibrate based on your stepper/gearing
 const int ACCELERATION_STEPS = 500;  // Ramp up over this many steps
 const int MAX_SPEED = 5000;   // Maximum frequency in Hz
 
@@ -102,9 +102,9 @@ void move_to_position(long target_steps, long duration_ms) {
   
   // Determine direction
   if (distance > 0) {
-    digitalWrite(DIR_PIN, HIGH);  // Forward
+    digitalWrite(DIR_PIN, LOW);  // Forward
   } else {
-    digitalWrite(DIR_PIN, LOW);   // Backward
+    digitalWrite(DIR_PIN, HIGH);   // Backward
     distance = -distance;
   }
   
@@ -145,7 +145,7 @@ void perform_step() {
 
 void home_gantry() {
   // Move backward until limit switch triggers
-  digitalWrite(DIR_PIN, LOW);  // Backward direction
+  digitalWrite(DIR_PIN, HIGH);  // Backward direction
   is_homing = true;
   limit_triggered = false;
   moving = true;
@@ -171,17 +171,18 @@ void stop_movement() {
 }
 
 void limit_switch_interrupt() {
-  if (is_homing) {
+  
     limit_triggered = true;
-  }
+    Serial.println("Switch triggered");
+  
   // Optional: add debounce or immediate stop behavior
 }
 
 void send_position_feedback() {
   // Calculate position in mm
   float position_mm = (float)current_step_position / STEPS_PER_MM;
-  Serial.print("POS:");
-  Serial.println(position_mm, 2);
+//  Serial.print("POS:");
+//  Serial.println(position_mm, 2);
 }
 
 void send_status() {
